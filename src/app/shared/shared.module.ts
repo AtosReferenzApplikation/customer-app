@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CircuitService } from './services/circuit/circuit.service';
 import { HttpClientModule } from '@angular/common/http';
+import { AuthenticationService} from './services/authentication/authentication.service';
 
 
 @NgModule({
@@ -11,7 +12,8 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule
   ],
   providers: [
-    CircuitService
+    CircuitService,
+    AuthenticationService
   ]
 })
 export class SharedModule { }

@@ -15,11 +15,11 @@ export class HomePage implements OnInit {
       private circuitService: CircuitService
   ) {}
 
-
   ngOnInit() {
     this.messages = this.circuitService.getMessages();
   }
 
-  sendMessage() {}
+  sendMessage() {
+  }
 
 }

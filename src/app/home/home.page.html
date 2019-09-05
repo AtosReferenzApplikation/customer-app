@@ -1,6 +1,6 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>
+    <ion-title (click)="redirect()">
       Kunden-App
     </ion-title>
   </ion-toolbar>
@@ -10,7 +10,7 @@
 
   <ion-card>
 
-    <ion-card-content>
+    <ion-card-content #scrollChat>
         <ion-item class="item item-text-wrap" *ngFor="let message of messages">
           <div margin-bottom="1px" margin-top="1px">
             <ion-label class="user-id"><b> {{ message.sender }} </b></ion-label>

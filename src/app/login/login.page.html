@@ -7,8 +7,26 @@
 <ion-content>
 
   <div id="login">
-    <ion-button type="button" (click)="logon()">
+    <ion-button type="button" (click)="logon()" *ngIf="!logedIn">
       Login
+    </ion-button>
+  </div>
+
+  <div id="logout">
+    <ion-button type="button" (click)="logout()" *ngIf="logedIn">
+      Logout
+    </ion-button>
+  </div>
+
+  <div id="socketTest">
+    <ion-button type="button" (click)="test)">
+      Send Message
+    </ion-button>
+  </div>
+
+  <div id="FreeSupporter">
+    <ion-button type="button" (click)="getFreeSupporter()">
+      Send Message
     </ion-button>
   </div>
 

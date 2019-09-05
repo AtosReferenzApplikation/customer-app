@@ -6,18 +6,18 @@ import { CircuitService } from '../circuit/circuit.service';
 })
 export class AuthenticationService {
   isLoggedIn = false;
-  redirectUrl: string;
 
   constructor(
       private circuitService: CircuitService
   ) {
-    this.circuitService.loggedIn.subscribe(
-        loggedIn => this.isLoggedIn = loggedIn
-    );
+    this.circuitService.loggedIn.subscribe(res => this.isLoggedIn = res);
   }
 
   logon() {
     return this.circuitService.authenticateUser();
   }
 
+  logout() {
+    return this.circuitService.logout();
+  }
 }

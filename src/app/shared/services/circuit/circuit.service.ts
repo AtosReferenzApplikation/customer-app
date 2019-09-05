@@ -3,13 +3,13 @@ import { BehaviorSubject } from 'rxjs';
 import { SAMPLE_MESSAGES } from '../../sample-messages';
 import Circuit from 'circuit-sdk';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CircuitService {
   authUri = 'https://circuitsandbox.net/oauth/authorize';
-  restUri = 'https://circuitsandbox.net/rest/v2';
 
   headers = new HttpHeaders()
       .set('Content-Type', 'application/json')
@@ -19,6 +19,7 @@ export class CircuitService {
   // SDK declarations
   client; // Circuit SDK instance
   user: any;  // Logged on user
+  public conversation: any; // Active conversation object
 
   // BehaviorSubjects
   public loggedIn = new BehaviorSubject(false);
@@ -27,16 +28,19 @@ export class CircuitService {
   oauthConfig = {
     domain: 'circuitsandbox.net',
     client_id: '7accbde69451477f98c395b9a35374bd',
+    // client_id: '8e3edf9798f341c08ae59b5d8cf74341',
     redirect_uri: this.redirectUri,
-    scope: 'ALL'
+    scope: 'READ_USER_PROFILE,' +
+        'READ_CONVERSATIONS,' +
+        'WRITE_CONVERSATIONS'
   };
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router: Router) {
     // Set Circuit SDK internal log level
     Circuit.logger.setLevel(Circuit.Enums.LogLevel.Debug);
 
     // create Circuit SDK client implicit
-    this.client = new Circuit.Client({
+    this.client = new Circuit.Client ({
       client_id: this.oauthConfig.client_id,
       domain: this.oauthConfig.domain,
       scope: this.oauthConfig.scope,
@@ -107,10 +111,10 @@ export class CircuitService {
               callbackUrl
           );
           localStorage.setItem('access_token', token);
-          this.logonWithToken();
+          return this.logonWithToken();
         }
       } catch (error) {} // todo: handle logon error
-    }, 100);
+    }, 50);
   }
 
   getValueFromString(value: string, url: string) {
@@ -125,9 +129,43 @@ export class CircuitService {
     }
   }
 
+  logout() {
+    this.loggedIn.next(false);
+    localStorage.removeItem('access_token');
+    this.router.navigate(['']);
+    return this.client.logout(true);
+  }
+
+  /**
+   * Conversations
+   */
+  getConversation(email: string) {
+    return this.client
+        .getDirectConversationWithUser(email, true)
+        .then(conversation => {
+          this.conversation = conversation;
+          return this.client
+              .getConversationFeed(conversation.convId)
+              .then(conv => conv);
+        })
+        .catch(err => {
+          if (!this.loggedIn.value) {
+            this.authenticateUser();
+          }
+        });
+  }
+
   /**********
    *  Misc
    **********/
+  getUserById(userId: string) {
+    return this.client.getUserById(userId);
+  }
+
+  get loggedOnUser() {
+    return this.client.loggedOnUser;
+  }
+
   get redirectUri() {
     return window.location.href;
   }

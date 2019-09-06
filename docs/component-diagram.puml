@@ -1,0 +1,28 @@
+@startuml Komponentendiagramm
+title Komponentendiagramm Kunden-App
+package "Client App" {
+    component "Client-UI"
+    component "Client-Service"
+}
+
+package "Service Center App" {
+    component "Service-Center-Service"
+    component "Service-Center-UI"
+}
+
+cloud {
+    component Circuit
+}
+
+queue Kafka
+
+[Client-UI] -> [Client-Service]
+[Client-Service] --> Kafka
+
+Kafka -[hidden]-> [Service-Center-Service]
+
+[Service-Center-Service] -> Kafka
+[Service-Center-UI] -> [Service-Center-Service]
+[Service-Center-Service] -> [Service-Center-UI]
+[Service-Center-Service] -> Circuit
+@enduml

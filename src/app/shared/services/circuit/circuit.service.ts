@@ -4,6 +4,7 @@ import { SAMPLE_MESSAGES } from '../../sample-messages';
 import Circuit from 'circuit-sdk';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Router} from '@angular/router';
+import { MessageContent } from '../../../models/messageContent';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class CircuitService {
   headers = new HttpHeaders()
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
-      .set('Authorization', 'Bearer ' + localStorage.getItem('access_token'));
+      .set('Authorization', 'Bearer ');
 
   // SDK declarations
   client; // Circuit SDK instance
@@ -24,15 +25,25 @@ export class CircuitService {
   // BehaviorSubjects
   public loggedIn = new BehaviorSubject(false);
 
+  // tslint:disable-next-line:ban-types
+  public addEventListener: Function;
+
   // OAuth configuration
   oauthConfig = {
     domain: 'circuitsandbox.net',
     client_id: '7accbde69451477f98c395b9a35374bd',
     // client_id: '8e3edf9798f341c08ae59b5d8cf74341',
     redirect_uri: this.redirectUri,
+    // tslint:disable-next-line: max-line-length
     scope: 'READ_USER_PROFILE,' +
+        'WRITE_USER_PROFILE,' +
         'READ_CONVERSATIONS,' +
-        'WRITE_CONVERSATIONS'
+        'WRITE_CONVERSATIONS,' +
+        'READ_USER,' +
+        'CALLS,' +
+        'CALL_RECORDING,' +
+        'MENTION_EVENT,' +
+        'USER_MANAGEMENT'
   };
 
   constructor(private http: HttpClient, private router: Router) {
@@ -46,109 +57,93 @@ export class CircuitService {
       scope: this.oauthConfig.scope,
       autoRenewToken: true
     });
+
+    // bind event listener directly to SDK addEventListener
+    this.addEventListener = this.client.addEventListener.bind(this);
   }
 
-  /**************
-   * CIRCUIT SDK
-   **************/
 
-  // try to logon with cached credentials/token
+
+  /**
+   * Logon to Circuit using OAuth2.
+   * @returns A promise returning a the user
+   */
   authenticateUser() {
-    this.loggedIn.next(false);
-    return this.validateAccessToken();
-  }
-
-  validateAccessToken() {
-    return this.client
-        .validateToken(localStorage.getItem('access_token'))
-        .then(() => this.logonWithToken())
-        .catch(() => this.logonPopup());
-  }
-
-  logonWithToken() {
-    return this.client
-        .logon({
-          accessToken: localStorage.getItem('access_token'),
-          prompt: false
-        })
-        .then(user => {
-          this.loggedIn.next(true);
-          return user;
-        })
-        .catch(err => {
-          return Promise.reject(err);
-        });
-  }
-
-  logonPopup() {
-    const state = Math.random()
-        .toString(36)
-        .substr(2, 15); // to prevent cross-site request forgery
-    const url =
-        this.authUri +
-        '?response_type=token&client_id=' +
-        this.oauthConfig.client_id +
-        '&redirect_uri=' +
-        this.redirectUri +
-        '&scope=' +
-        this.oauthConfig.scope +
-        '&state=' +
-        state; // auth request url
-
-    const logonPopup = window.open(
-        url, 'Circuit Authentication', 'centerscreen,location,resizable,alwaysRaised,width=400,height=504'
-    );
-
-    // close popup if user login was successful
-    const checkLogon = setInterval(() => {
-      try {
-        if (logonPopup.location.href.includes('access_token=')) {
-          const callbackUrl = logonPopup.location.href;
-          clearInterval(checkLogon);
-          logonPopup.close();
-          const token = this.getValueFromString(
-              'access_token',
-              callbackUrl
-          );
-          localStorage.setItem('access_token', token);
-          return this.logonWithToken();
-        }
-      } catch (error) {} // todo: handle logon error
-    }, 50);
-  }
-
-  getValueFromString(value: string, url: string) {
-    value = value.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    const regexS = '[\\?&]' + value + '=([^&#]*)';
-    const regex = new RegExp(regexS);
-    const results = regex.exec(url);
-    if (results == null) {
-      return ''; // todo: handle logon error
-    } else {
-      return decodeURIComponent(results[1].replace(/\+/g, ' '));
+    if (this.loggedIn.value === true) {
+      return this.loggedOnUser;
     }
+    this.loggedIn.next(false);
+    return this.client.logon().then(user => {
+      this.loggedIn.next(true);
+      return user;
+    }).catch(err => Promise.reject(err));
   }
 
+  /**
+   * Forces the logout
+   * @returns An empty promise
+   */
   logout() {
     this.loggedIn.next(false);
-    localStorage.removeItem('access_token');
-    this.router.navigate(['']);
+    this.router.navigate(['/login']);
     return this.client.logout(true);
   }
 
   /**
-   * Conversations
+   * Gets a user by his user id
+   * @param userId - Circuit user ID
+   * @returns A promise that returns the user
    */
-  getConversation(email: string) {
+  getUserById(userId: string) {
+    return this.client.getUserById(userId);
+  }
+
+
+  /**
+   * Get the direct conversation with a user. A conversation will be created. If the user is not logged in, he will be prompted to do so.
+   * @param user - User ID or email address
+   * @returns A promise returning a the conversation
+   */
+  getConversation(user: string) {
     return this.client
-        .getDirectConversationWithUser(email, true)
+        .getDirectConversationWithUser(user, true)
         .then(conversation => {
           this.conversation = conversation;
           return this.client
               .getConversationFeed(conversation.convId)
               .then(conv => conv);
         })
-        .catch(err => {
+        .catch(() => {
+          if (!this.loggedIn.value) {
+            this.authenticateUser();
+          }
+        });
+  }
+  /**
+   * Get all messages of a thread
+   */
+  getMessagesByThread(convId: string, threadId: string) {
+    return this.client
+        .getItemsByThread(convId, threadId)
+        .then( items => items);
+  }
+
+  /**
+   * Sends a message to a conversation. If the user is not logged in, he will be prompted to do so.
+   * @param  content - User ID or email address
+   * @returns  A promise returning a the message
+   */
+  sendMessage(content: MessageContent) {
+    return this.client
+        .addTextItem(this.conversation.convId, content)
+        .then(item => {
+          return {
+            client: this.client,
+            conv: this.conversation,
+            item
+          };
+        })
+        .catch(() => {
           if (!this.loggedIn.value) {
             this.authenticateUser();
           }
@@ -158,19 +153,11 @@ export class CircuitService {
   /**********
    *  Misc
    **********/
-  getUserById(userId: string) {
-    return this.client.getUserById(userId);
-  }
-
   get loggedOnUser() {
     return this.client.loggedOnUser;
   }
 
   get redirectUri() {
     return window.location.href;
-  }
-
-  getMessages() {
-    return SAMPLE_MESSAGES;
   }
 }

@@ -2,15 +2,15 @@ package app;
 
 public class Supporter {
 
-    private String name;
+    private String email;
 
     public Supporter() {}
 
-    public Supporter(String name) {
-        this.name = name;
+    public Supporter(String email) {
+        this.email = email;
     }
 
-    public String getName() {
-        return name;
+    public String getEmail() {
+        return email;
     }
 }

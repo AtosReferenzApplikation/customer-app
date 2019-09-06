@@ -3,6 +3,12 @@ import { AuthenticationService} from '../shared/services/authentication/authenti
 import { Router } from '@angular/router';
 import {CircuitService} from '../shared/services/circuit/circuit.service';
 import { WebsocketService} from '../shared/services/websocket/websocket.service';
+import { first } from 'rxjs/operators';
+
+import { SupportRequest } from '../models/supportRequest';
+import { Supporter } from '../models/supporter';
+import {LoadingController} from '@ionic/angular';
+
 
 @Component({
   selector: 'app-login',
@@ -12,8 +18,14 @@ import { WebsocketService} from '../shared/services/websocket/websocket.service'
 export class LoginPage implements OnInit {
 
   logedIn: boolean;
+  request: SupportRequest = {subject: ''};
+  supporter: Supporter;
+
+  subject: string;
+  description: string;
 
   constructor(
+      public loadingController: LoadingController,
       public circuitService: CircuitService,
       public authService: AuthenticationService,
       private router: Router,
@@ -24,12 +36,17 @@ export class LoginPage implements OnInit {
     this.circuitService.loggedIn.subscribe(res => this.logedIn = res);
   }
 
-  test() {
-    this.websocket.send('/app/get/supporter', 'Hier könnte ihre Werbung stehen!');
-  }
-
-  getFreeSupporter() {
-
+  getAvailableSupporter() {
+    this.presentLoadingWithOptions();
+    this.request.subject = this.subject;
+    this.websocket.send('/app/get/supporter', this.request);
+    this.websocket
+        .onMessage('/topic/deliverSupporter')
+        .pipe(first())
+        .subscribe(res => {
+          this.supporter = JSON.parse(res);
+          this.loadingController.dismiss();
+        });
   }
 
   logon() {
@@ -47,5 +64,15 @@ export class LoginPage implements OnInit {
 
   private redirectUser() {
     this.router.navigate(['support']);
+  }
+
+  async presentLoadingWithOptions() {
+    const loading = await this.loadingController.create({
+      spinner: 'bubbles',
+      message: 'Der nächste freie Mitarbeiter wird sich um Sie kümmern.',
+      translucent: true,
+      cssClass: 'custom-class custom-loading'
+    });
+    return await loading.present();
   }
 }

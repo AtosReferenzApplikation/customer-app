@@ -1,6 +1,9 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title (click)="redirect()">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title (click)="redirect()"> <!--TODO implement ionics route back feature-->
       Kunden-App
     </ion-title>
   </ion-toolbar>
@@ -8,21 +11,23 @@
 
 <ion-content>
 
-  <ion-card>
+  <ion-card *ngIf="participants && thread">
 
-    <ion-card-content #scrollChat>
-        <ion-item class="item item-text-wrap" *ngFor="let message of messages">
+    <ion-card-content>
+      <div *ngFor="let thread of thread">
+        <ion-item class="item item-text-wrap" *ngFor="let text of items.items"> <!-- TODO fix error -->
           <div margin-bottom="1px" margin-top="1px">
-            <ion-label class="user-id"><b> {{ message.sender }} </b></ion-label>
-            <ion-label text-wrap> {{ message.message }} </ion-label>
+            <ion-label class="user-id"><b> {{getParticipantById(text.creatorId)}} </b></ion-label>
+            <ion-label text-wrap [innerHTML]="text.text.content"></ion-label>
           </div>
         </ion-item>
+      </div>
     </ion-card-content>
 
     <ion-footer>
-      <form (ngSubmit)='sendMessage()'>
-        <ion-textarea  rows="4" placeholder="Enter a message" type="text" name="message"></ion-textarea>
-        <ion-button expand="full" type="Submit">Send</ion-button>
+      <form>
+        <ion-textarea  rows="4" placeholder="Enter a message" type="text" name="message" [(ngModel)]="messageInput"></ion-textarea>
+        <ion-button expand="full" type="Submit" (click)="sendMessage(messageInput,threads[0])">Senden</ion-button>
       </form>
     </ion-footer>
 

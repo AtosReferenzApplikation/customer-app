@@ -12,7 +12,6 @@
 <ion-content>
 
   <ion-card *ngIf="participants && thread">
-
     <ion-card-content>
       <div *ngFor="let thread of thread">
         <ion-item class="item item-text-wrap" *ngFor="let text of items.items"> <!-- TODO fix error -->
@@ -27,7 +26,7 @@
     <ion-footer>
       <form>
         <ion-textarea  rows="4" placeholder="Enter a message" type="text" name="message" [(ngModel)]="messageInput"></ion-textarea>
-        <ion-button expand="full" type="Submit" (click)="sendMessage(messageInput,threads[0])">Senden</ion-button>
+        <ion-button expand="full" type="Submit" (click)="sendMessage(messageInput,thread[0])">Senden</ion-button>
       </form>
     </ion-footer>
 

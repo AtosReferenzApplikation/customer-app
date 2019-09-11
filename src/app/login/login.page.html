@@ -10,7 +10,7 @@
 
 <ion-content>
 
-  <div>
+  <div *ngIf="logedIn">
       <ion-list lines="full" class="ion-no-margin ion-no-padding">
 
         <ion-item>
@@ -29,15 +29,8 @@
       </ion-list>
 
       <div class="ion-padding">
-        <ion-button (click)="getAvailableSupporter()" expand="block" type="submit" class="ion-no-margin">Start Chat</ion-button>
+        <ion-button (click)="startChat()" expand="block" type="submit" class="ion-no-margin">Start Chat</ion-button>
       </div>
-  </div>
-
-  <div id="AvailableSupporter">
-    <ion-button type="button" (click)="getAvailableSupporter()" *ngIf="subject">
-      Request Supporter
-    </ion-button>
-    <a *ngIf="supporter?.email"> Dein Supporter ist: {{ supporter?.email }} !</a>
   </div>
 
 </ion-content>

@@ -3,12 +3,12 @@ import { AuthenticationService} from '../shared/services/authentication/authenti
 import { Router } from '@angular/router';
 import {CircuitService} from '../shared/services/circuit/circuit.service';
 import { WebsocketService} from '../shared/services/websocket/websocket.service';
+import { ConversationService } from '../shared/services/conversation/conversation.service';
 import { first } from 'rxjs/operators';
 
 import { SupportRequest } from '../models/supportRequest';
 import { Supporter } from '../models/supporter';
 import {LoadingController} from '@ionic/angular';
-
 
 @Component({
   selector: 'app-login',
@@ -18,8 +18,8 @@ import {LoadingController} from '@ionic/angular';
 export class LoginPage implements OnInit {
 
   logedIn: boolean;
-  request: SupportRequest = {subject: ''};
-  supporter: Supporter;
+  request: SupportRequest = {subject: '', description: ''};
+  supporter: Supporter = {email : ''};
 
   subject: string;
   description: string;
@@ -29,33 +29,34 @@ export class LoginPage implements OnInit {
       public circuitService: CircuitService,
       public authService: AuthenticationService,
       private router: Router,
-      private websocket: WebsocketService
+      private websocket: WebsocketService,
+      public conversationService: ConversationService
   ) { }
 
   ngOnInit() {
     this.circuitService.loggedIn.subscribe(res => this.logedIn = res);
   }
 
-  getAvailableSupporter() {
+  startChat() {
     this.presentLoadingWithOptions();
     this.request.subject = this.subject;
+    this.request.description = this.description;
+    this.conversationService.changeRequest(this.request);
     this.websocket.send('/app/get/supporter', this.request);
     this.websocket
         .onMessage('/topic/deliverSupporter')
         .pipe(first())
         .subscribe(res => {
           this.supporter = JSON.parse(res);
+          this.conversationService.changeSupporter(this.supporter);
           this.loadingController.dismiss();
+          this.redirectUser();
         });
+
   }
 
   logon() {
-    this.authService.logon()
-        .then(() => {
-          if (this.logedIn) {
-            this.redirectUser();
-          }
-        });
+    this.authService.logon();
   }
 
   logout() {

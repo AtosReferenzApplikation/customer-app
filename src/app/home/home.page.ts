@@ -2,6 +2,10 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { CircuitService} from '../shared/services/circuit/circuit.service';
 import {Router} from '@angular/router';
 import { LoadingController } from '@ionic/angular';
+import { ConversationService } from '../shared/services/conversation/conversation.service';
+import { Supporter } from '../models/supporter';
+import {SupportRequest} from '../models/supportRequest';
+import {first} from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -10,15 +14,16 @@ import { LoadingController } from '@ionic/angular';
 })
 export class HomePage implements OnInit {
 
-  worker = 'Frank.Rot86@mailinator.com';
   participants = [];
+  supporter: Supporter = {email : ''};
+  request: SupportRequest = {subject: '', description: ''}
 
-  loggedIn: boolean;
   user: any;
   threads = []; // all threads of conversation
   thread = [];   // current thread of conversation
   items = [];   // all items of current thread
   messageInput: string;
+
 
   subject = 'Test'; // TODO use SupportRequest model to get information about the request
   description = 'Problem bei ....';
@@ -26,40 +31,38 @@ export class HomePage implements OnInit {
   constructor(
       public loadingController: LoadingController,
       public circuitService: CircuitService,
-      private router: Router
+      private router: Router,
+      public conversationService: ConversationService
   ) {
     this.user = this.circuitService.loggedOnUser;
   }
 
   ngOnInit() {
     this.presentLoadingWithOptions();
-    this.circuitService.authenticateUser()
-        .then();
-
+    this.circuitService.authenticateUser();
+    this.conversationService.currentSupporter.subscribe(supporter => this.supporter = supporter);
+    this.conversationService.currentRequest.pipe(first()).subscribe( request => this.request = request);
     this.circuitService.loggedIn.subscribe(value => {
       if (value) {
         this.setThreadsOfConversation();
       }
     });
+
+    // TODO Scroll Chat window down, if new message is added
+    this.circuitService.addEventListener('itemAdded', () => {
+      this.setThreadsOfConversation();
+    });
   }
 
   async setThreadsOfConversation() {
+    console.log(this.request.subject);
+    console.log(this.request.description);
     const threadObject = await this.circuitService.getConversation(
-        this.worker   // TODO implement get supporter with websocket
+      this.supporter.email
     );
     this.threads = threadObject.threads;
     await this.getCurrentThread(this.subject, this.description);
     this.items = await this.getMessagesFromCurrentThread();
-
-    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-    console.log(this.circuitService.conversation);
-    console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB');
-    console.log(this.threads);
-    console.log('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC');
-    console.log(this.thread);
-    console.log('DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD');
-    console.log(this.items);
-
     this.getParticipants();
     this.onLoaded();
   }
@@ -77,6 +80,7 @@ export class HomePage implements OnInit {
     for (const i in this.threads) {
       if (this.threads[i].parentItem.type === 'TEXT') {
         if (this.threads[i].parentItem.text.subject === subject) {
+          this.thread.pop();
           this.thread.push(this.threads[i]);
         }
       }

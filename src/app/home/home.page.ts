@@ -1,11 +1,11 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CircuitService} from '../shared/services/circuit/circuit.service';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
 import { ConversationService } from '../shared/services/conversation/conversation.service';
 import { Supporter } from '../models/supporter';
-import {SupportRequest} from '../models/supportRequest';
-import {first} from 'rxjs/operators';
+import { SupportRequest } from '../models/supportRequest';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -16,14 +16,13 @@ export class HomePage implements OnInit {
 
   participants = [];
   supporter: Supporter = {email : ''};
-  request: SupportRequest = {subject: '', description: ''}
+  request: SupportRequest = {subject: '', description: ''};
 
   user: any;
   threads = []; // all threads of conversation
   thread = [];   // current thread of conversation
   items = [];   // all items of current thread
   messageInput: string;
-
 
   subject = 'Test'; // TODO use SupportRequest model to get information about the request
   description = 'Problem bei ....';
@@ -110,10 +109,6 @@ export class HomePage implements OnInit {
     } catch {
       return 'Name not found';
     }
-  }
-
-  redirect() {
-    this.router.navigate(['']);
   }
 
   sendMessage(content: string, thread: any) {

@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import Circuit from 'circuit-sdk';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Router} from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { MessageContent } from '../../../models/messageContent';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CircuitService {
-  authUri = 'https://circuitsandbox.net/oauth/authorize';
 
   headers = new HttpHeaders()
       .set('Content-Type', 'application/json')
@@ -30,8 +29,7 @@ export class CircuitService {
   // OAuth configuration
   oauthConfig = {
     domain: 'circuitsandbox.net',
-    client_id: '7accbde69451477f98c395b9a35374bd',
-    // client_id: '8e3edf9798f341c08ae59b5d8cf74341',
+    client_id: '7accbde69451477f98c395b9a35374bd',  // TODO move customer app and ServiceCenter to same sandbox
     redirect_uri: this.redirectUri,
     // tslint:disable-next-line: max-line-length
     scope: 'READ_USER_PROFILE,' +
@@ -60,8 +58,6 @@ export class CircuitService {
     // bind event listener directly to SDK addEventListener
     this.addEventListener = this.client.addEventListener.bind(this);
   }
-
-
 
   /**
    * Logon to Circuit using OAuth2.
@@ -97,7 +93,6 @@ export class CircuitService {
     return this.client.getUserById(userId);
   }
 
-
   /**
    * Get the direct conversation with a user. A conversation will be created. If the user is not logged in, he will be prompted to do so.
    * @param user - User ID or email address
@@ -118,6 +113,7 @@ export class CircuitService {
           }
         });
   }
+
   /**
    * Get all messages of a thread
    */

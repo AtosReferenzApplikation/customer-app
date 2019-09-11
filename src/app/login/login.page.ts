@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService} from '../shared/services/authentication/authentication.service';
 import { Router } from '@angular/router';
-import {CircuitService} from '../shared/services/circuit/circuit.service';
+import { CircuitService } from '../shared/services/circuit/circuit.service';
 import { WebsocketService} from '../shared/services/websocket/websocket.service';
 import { ConversationService } from '../shared/services/conversation/conversation.service';
 import { first } from 'rxjs/operators';
-
 import { SupportRequest } from '../models/supportRequest';
 import { Supporter } from '../models/supporter';
-import {LoadingController} from '@ionic/angular';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',

@@ -8,6 +8,7 @@ import { first } from 'rxjs/operators';
 import { SupportRequest } from '../models/supportRequest';
 import { Supporter } from '../models/supporter';
 import { LoadingController } from '@ionic/angular';
+import * as uuid from 'uuid';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ import { LoadingController } from '@ionic/angular';
 export class LoginPage implements OnInit {
 
   logedIn: boolean;
-  request: SupportRequest = {subject: '', description: ''};
+  request: SupportRequest = {id: '', subject: '', description: ''};
   supporter: Supporter = {email : ''};
 
   subject: string;
@@ -38,22 +39,22 @@ export class LoginPage implements OnInit {
 
   startChat() {
     this.presentLoadingWithOptions();
+    this.request.id = uuid.v4();
     this.request.subject = this.subject;
     this.request.description = this.description;
     this.conversationService.changeRequest(this.request);
     this.websocket.send('/app/get/supporter', this.request);
     this.websocket
-        .onMessage('/topic/deliverSupporter')
+        .onMessage('/topic/deliverSupporter/' + this.request.id)
         .pipe(first())
         .subscribe(res => {
           this.supporter = JSON.parse(res);
           this.conversationService.changeSupporter(this.supporter);
           this.loadingController.dismiss();
           this.subject = '';
-          this.description = ''
+          this.description = '';
           this.redirectUser();
         });
-
   }
 
   logon() {

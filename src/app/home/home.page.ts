@@ -15,7 +15,7 @@ export class HomePage implements OnInit {
 
   participants = [];
   supporter: Supporter = {email : ''};
-  request: SupportRequest = {subject: '', description: ''};
+  request: SupportRequest = {id: '', subject: '', description: ''};
 
   user: any;
   threads = []; // all threads of conversation
@@ -45,6 +45,7 @@ export class HomePage implements OnInit {
         this.setThreadsOfConversation();
       }
     });
+    // TODO itemUpdated event should be added, so all messages are getting loaded properly
     this.circuitService.addEventListener('itemAdded', () => {
       this.setThreadsOfConversation();
     });

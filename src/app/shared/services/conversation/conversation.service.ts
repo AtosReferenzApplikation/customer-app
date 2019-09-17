@@ -8,7 +8,7 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class ConversationService {
 
-  request: SupportRequest = {subject: '', description: ''};
+  request: SupportRequest = {id: '', subject: '', description: ''};
   supporter: Supporter = {email: ''};
 
   private requestData = new BehaviorSubject(this.request);

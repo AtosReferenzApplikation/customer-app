@@ -6,6 +6,7 @@ import { CircuitService } from '../circuit/circuit.service';
 })
 export class AuthenticationService {
   isLoggedIn = false;
+  redirectUrl: string;
 
   constructor(
       private circuitService: CircuitService

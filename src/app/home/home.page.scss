@@ -1,11 +1,10 @@
-ion-card-content {
-  overflow: scroll;
-  overflow-x: hidden;
-}
-ion-card {
-  height: 96%;
+.body {
   display: flex;
   flex-direction: column;
 }
-
-
+.chat {
+  height: 95%;
+  overflow: scroll;
+  overflow-x: hidden;
+  flex: auto;
+}

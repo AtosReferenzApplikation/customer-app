@@ -31,7 +31,6 @@ export class CircuitService {
     domain: 'circuitsandbox.net',
     client_id: '7accbde69451477f98c395b9a35374bd',  // TODO move customer app and ServiceCenter to same sandbox
     redirect_uri: this.redirectUri,
-    // tslint:disable-next-line: max-line-length
     scope: 'READ_USER_PROFILE,' +
         'WRITE_USER_PROFILE,' +
         'READ_CONVERSATIONS,' +

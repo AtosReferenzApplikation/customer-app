@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { AuthGuardService } from '../shared/services/authentication/auth-guard.service';
 
 import { HomePage } from './home.page';
 
@@ -14,7 +15,8 @@ import { HomePage } from './home.page';
     RouterModule.forChild([
       {
         path: '',
-        component: HomePage
+        component: HomePage,
+        canActivate: [AuthGuardService]
       }
     ])
   ],

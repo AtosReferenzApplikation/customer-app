@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { CircuitService} from '../shared/services/circuit/circuit.service';
-import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
 import { ConversationService } from '../shared/services/conversation/conversation.service';
 import { Supporter } from '../models/supporter';
@@ -24,14 +23,13 @@ export class HomePage implements OnInit {
   items = [];   // all items of current thread
   messageInput: string;
 
-  subject = 'Test'; // TODO use SupportRequest model to get information about the request
-  description = 'Problem bei ....';
+  container: HTMLElement;
 
+  @ViewChild('scrollChat', {static: false}) private chat: ElementRef<any>;
   constructor(
       public loadingController: LoadingController,
       public circuitService: CircuitService,
-      private router: Router,
-      public conversationService: ConversationService
+      public conversationService: ConversationService,
   ) {
     this.user = this.circuitService.loggedOnUser;
   }
@@ -41,27 +39,26 @@ export class HomePage implements OnInit {
     this.circuitService.authenticateUser();
     this.conversationService.currentSupporter.subscribe(supporter => this.supporter = supporter);
     this.conversationService.currentRequest.pipe(first()).subscribe( request => this.request = request);
+    this.startNewChat(this.request.subject, this.request.description);
     this.circuitService.loggedIn.subscribe(value => {
       if (value) {
         this.setThreadsOfConversation();
       }
     });
-
-    // TODO Scroll Chat window down, if new message is added
     this.circuitService.addEventListener('itemAdded', () => {
       this.setThreadsOfConversation();
     });
   }
 
   async setThreadsOfConversation() {
-    console.log(this.request.subject);
-    console.log(this.request.description);
     const threadObject = await this.circuitService.getConversation(
       this.supporter.email
     );
     this.threads = threadObject.threads;
-    await this.getCurrentThread(this.subject, this.description);
-    this.items = await this.getMessagesFromCurrentThread();
+    await this.getCurrentThread(this.request.subject, this.request.description);
+    if (this.thread[0].comments[0]) {
+      this.items = await this.getMessagesFromCurrentThread();
+    }
     this.getParticipants();
     this.onLoaded();
   }
@@ -70,7 +67,8 @@ export class HomePage implements OnInit {
     const checkParticipants = setInterval(() => {
       if (this.participants) {
         clearInterval(checkParticipants);
-        this.loadingController.dismiss();
+        this.loadingController.getTop().then(v => v ? this.loadingController.dismiss() : null);
+        this.scrollDown();
       }
     }, 100);
   }
@@ -78,7 +76,7 @@ export class HomePage implements OnInit {
   getCurrentThread(subject: string, description: string) {
     for (const i in this.threads) {
       if (this.threads[i].parentItem.type === 'TEXT') {
-        if (this.threads[i].parentItem.text.subject === subject) {
+        if (this.threads[i].parentItem.text.subject === subject && this.threads[i].parentItem.text.content === description) {
           this.thread.pop();
           this.thread.push(this.threads[i]);
         }
@@ -91,6 +89,16 @@ export class HomePage implements OnInit {
         this.circuitService.conversation.convId,
         this.thread[0].parentItem.itemId
     );
+  }
+
+  async startNewChat(subject: string, content: string) {
+    const threadObject = await this.circuitService.getConversation(
+        this.supporter.email
+    );
+    this.threads = threadObject.threads;
+    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+    console.log(this.threads);
+    this.sendTopicMessage(subject, content);
   }
 
   getParticipants() {
@@ -139,4 +147,8 @@ export class HomePage implements OnInit {
     return await loading.present();
   }
 
+  scrollDown() {
+    this.container = document.getElementById('chat');
+    this.container.scrollTop = this.container.scrollHeight;
+  }
 }

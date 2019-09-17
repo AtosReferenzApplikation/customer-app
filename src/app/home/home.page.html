@@ -9,27 +9,26 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="body">
 
-  <ion-card *ngIf="participants && thread">
+  <ion-card class="chat" id="chat" *ngIf="participants && thread">
     <ion-card-content>
-      <div *ngFor="let thread of thread">
-        <ion-item class="item item-text-wrap" *ngFor="let text of items.items"> <!-- TODO fix error -->
-          <div margin-bottom="1px" margin-top="1px">
-            <ion-label class="user-id"><b> {{getParticipantById(text.creatorId)}} </b></ion-label>
-            <ion-label text-wrap [innerHTML]="text.text.content"></ion-label>
-          </div>
+        <ion-item text-wrap *ngFor="let text of items.items"> <!-- TODO fix error -->
+          <ion-label>
+            <div><b> {{getParticipantById(text.creatorId)}} </b></div>
+            <div><ion-label text-wrap [innerHTML]="text.text.content"></ion-label></div>
+          </ion-label>
         </ion-item>
-      </div>
     </ion-card-content>
-
-    <ion-footer>
-      <form>
-        <ion-textarea  rows="4" placeholder="Enter a message" type="text" name="message" [(ngModel)]="messageInput"></ion-textarea>
-        <ion-button expand="full" type="Submit" (click)="sendMessage(messageInput,thread[0])">Senden</ion-button>
-      </form>
-    </ion-footer>
-
   </ion-card>
 
 </ion-content>
+
+<ion-footer>
+  <ion-card>
+    <form>
+      <ion-textarea  rows="4" placeholder="Enter a message" type="text" name="message" [(ngModel)]="messageInput"></ion-textarea>
+      <ion-button expand="full" type="Submit" (click)="sendMessage(messageInput,thread[0])">Senden</ion-button>
+    </form>
+  </ion-card>
+</ion-footer>

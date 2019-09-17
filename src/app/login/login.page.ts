@@ -49,6 +49,8 @@ export class LoginPage implements OnInit {
           this.supporter = JSON.parse(res);
           this.conversationService.changeSupporter(this.supporter);
           this.loadingController.dismiss();
+          this.subject = '';
+          this.description = ''
           this.redirectUser();
         });
 

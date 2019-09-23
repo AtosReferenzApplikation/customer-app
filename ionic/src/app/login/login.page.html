@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Kunden-App</ion-title>
+    <ion-buttons slot="primary">
+      <ion-button (click)="logout()" *ngIf="logedIn">Logout</ion-button>
+      <ion-button (click)="logon()" *ngIf="!logedIn">Login</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div *ngIf="logedIn">
+      <ion-list lines="full" class="ion-no-margin ion-no-padding">
+
+        <ion-item>
+          <ion-label position="stacked">Wozu haben Sie eine Frage?<ion-text color="danger">*</ion-text></ion-label>
+          <ion-select interface="popover" [(ngModel)]="subject">
+            <ion-select-option value="Account">Account</ion-select-option>
+            <ion-select-option value="Rechnung">Rechnung</ion-select-option>
+            <ion-select-option value="Sonstiges">Sonstiges</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Beschreibung</ion-label>
+          <ion-textarea rows="4" placeholder="Beschreiben Sie ihr Anliegen" type="text" [(ngModel)]="description"></ion-textarea>
+        </ion-item>
+      </ion-list>
+
+      <div class="ion-padding">
+        <ion-button (click)="startChat()" expand="block" type="submit" class="ion-no-margin">Start Chat</ion-button>
+      </div>
+  </div>
+
+  <div *ngIf="logedIn">
+    <ion-item>
+      <ion-label> Liste mit Tickets </ion-label>
+    </ion-item>
+  </div>
+
+</ion-content>

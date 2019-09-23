@@ -1,10 +1,11 @@
-package app;
+package app.model;
 
 public class Supporter {
 
-    private String email;
+    String email;
 
-    public Supporter() {}
+    public Supporter() {
+    }
 
     public Supporter(String email) {
         this.email = email;
@@ -13,4 +14,5 @@ public class Supporter {
     public String getEmail() {
         return email;
     }
+
 }

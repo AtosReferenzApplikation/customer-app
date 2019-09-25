@@ -36,6 +36,7 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {
     this.circuitService.loggedIn.subscribe(res => this.logedIn = res);
+    this.conversationService.checkUUID();
     this.conversationService.currentUUID.subscribe( res => this.uuid = res);
   }
 
@@ -55,8 +56,8 @@ export class LoginPage implements OnInit {
           this.loadingController.dismiss();
           this.subject = '';
           this.description = '';
-          this.router.navigate(['support']);
-          // this.redirectUser();
+          // this.router.navigate(['support']);
+          this.redirectUser();
         });
   }
 

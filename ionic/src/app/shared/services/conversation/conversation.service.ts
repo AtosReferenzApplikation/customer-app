@@ -16,13 +16,13 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class ConversationService implements OnInit {
+export class ConversationService {
 
   request: SupportRequest = {id: '', subject: '', description: ''};
   supporter: Supporter = {email: ''};
 
   uuid: string;
-  private _UUID = new BehaviorSubject(this.uuid);
+  public _UUID = new BehaviorSubject(this.uuid);
   currentUUID = this._UUID.asObservable();
 
   private requestData = new BehaviorSubject(this.request);
@@ -33,10 +33,6 @@ export class ConversationService implements OnInit {
   constructor(private http: HttpClient,
               private cookieService: CookieService
   ) { }
-
-  ngOnInit(): void {
-    this.checkUUID();
-  }
 
   changeSupporter(supporter: Supporter) {
     this.supporterData.next(supporter);
@@ -60,6 +56,10 @@ export class ConversationService implements OnInit {
       this._UUID.next(uuid.v4());
       this.cookieService.set('UUID', this._UUID.getValue());
     }
+  }
+
+  getUUID() {
+    return this.currentUUID;
   }
 
 }

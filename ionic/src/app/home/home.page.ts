@@ -19,6 +19,8 @@ export class HomePage implements OnInit {
   request: SupportRequest = {id: '', subject: '', description: ''};
   ticket: Ticket = {userId: '', convId: '', threadId: ''};
   uuid: string;
+  threadId = '';
+  ticketSet = true;
 
   user: any;
   threads = []; // all threads of conversation
@@ -35,6 +37,7 @@ export class HomePage implements OnInit {
       public conversationService: ConversationService
   ) {
     this.user = this.circuitService.loggedOnUser;
+    this.conversationService.currentUUID.subscribe( res => this.uuid = res);
   }
 
   ngOnInit() {
@@ -43,7 +46,6 @@ export class HomePage implements OnInit {
     this.conversationService.currentSupporter.subscribe(supporter => this.supporter = supporter);
     this.conversationService.currentRequest.pipe(first()).subscribe( request => this.request = request);
     this.startNewChat(this.request.subject, this.request.description);
-    this.setTicket();
     this.circuitService.loggedIn.subscribe(value => {
       if (value) {
         this.setThreadsOfConversation();
@@ -84,6 +86,11 @@ export class HomePage implements OnInit {
         if (this.threads[i].parentItem.text.subject === subject && this.threads[i].parentItem.text.content === description) {
           this.thread.pop();
           this.thread.push(this.threads[i]);
+          this.threadId = this.thread[0].parentItem.itemId;
+          if (!this.ticketSet) {
+            this.setTicket();
+            this.ticketSet = true;
+          }
         }
       }
     }
@@ -96,12 +103,14 @@ export class HomePage implements OnInit {
     );
   }
 
-  async startNewChat(subject: string, content: string) {
-    const threadObject = await this.circuitService.getConversation(
-        this.supporter.email
+  startNewChat(subject: string, content: string) {
+    this.circuitService.getConversation(this.supporter.email).then(res => {
+            const threadObject = res;
+            this.threads = threadObject.threads;
+            this.sendTopicMessage(subject, content);
+            this.ticketSet = false;
+        }
     );
-    this.threads = threadObject.threads;
-    this.sendTopicMessage(subject, content);
   }
 
   getParticipants() {
@@ -135,7 +144,7 @@ export class HomePage implements OnInit {
 
   sendTopicMessage(subject: string, content: string) {
     if (subject !== '') {
-      this.circuitService
+      return this.circuitService
           .sendMessage({ subject, content });
     }
   }
@@ -150,14 +159,9 @@ export class HomePage implements OnInit {
     return await loading.present();
   }
 
-  async setTicket() {
-      await this.conversationService.currentUUID.subscribe(res => this.uuid = res);
-      this.ticket = {userId: this.uuid, convId: this.circuitService.conversation.convId, threadId: this.thread[0].parentItem.itemId};
-      // this.ticket.userId = this.uuid;
-      // this.ticket.convId = this.circuitService.conversation.convId;
-      // this.ticket.threadId = this.thread[0].parentItem.itemId;
-      console.log('Test');
-      await this.conversationService.addTicket('/spring/addTicket', this.ticket).subscribe();
+  setTicket() {
+      this.ticket = {userId: this.uuid, convId: this.circuitService.convId, threadId: this.threadId};
+      this.conversationService.addTicket('/spring/addTicket', this.ticket).subscribe();
   }
 
   scrollDown() {

@@ -19,6 +19,7 @@ export class CircuitService {
   client; // Circuit SDK instance
   user: any;  // Logged on user
   public conversation: any; // Active conversation object
+  public convId: string;
 
   // BehaviorSubjects
   public loggedIn = new BehaviorSubject(false);
@@ -44,7 +45,7 @@ export class CircuitService {
 
   constructor(private http: HttpClient, private router: Router) {
     // Set Circuit SDK internal log level
-    Circuit.logger.setLevel(Circuit.Enums.LogLevel.Debug);
+    // Circuit.logger.setLevel(Circuit.Enums.LogLevel.Debug);
 
     // create Circuit SDK client implicit
     this.client = new Circuit.Client ({
@@ -102,6 +103,7 @@ export class CircuitService {
         .getDirectConversationWithUser(user, true)
         .then(conversation => {
           this.conversation = conversation;
+          this.convId = conversation.convId;
           return this.client
               .getConversationFeed(conversation.convId)
               .then(conv => conv);

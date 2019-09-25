@@ -20,6 +20,7 @@ export class LoginPage implements OnInit {
   logedIn: boolean;
   request: SupportRequest = {id: '', subject: '', description: ''};
   supporter: Supporter = {email : ''};
+  uuid: string;
 
   subject: string;
   description: string;
@@ -35,6 +36,7 @@ export class LoginPage implements OnInit {
 
   ngOnInit() {
     this.circuitService.loggedIn.subscribe(res => this.logedIn = res);
+    this.conversationService.currentUUID.subscribe( res => this.uuid = res);
   }
 
   startChat() {
@@ -53,7 +55,8 @@ export class LoginPage implements OnInit {
           this.loadingController.dismiss();
           this.subject = '';
           this.description = '';
-          this.redirectUser();
+          this.router.navigate(['support']);
+          // this.redirectUser();
         });
   }
 

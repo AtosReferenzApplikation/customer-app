@@ -17,8 +17,9 @@ public class SessionController {
     }
 
     @RequestMapping(value = "/addTicket", consumes = "application/json", method = RequestMethod.POST)
-    public void addTicket (@RequestBody Ticket ticket) {
+    public Ticket addTicket (@RequestBody Ticket ticket) {
         sessionRepository.save(ticket);
+        return ticket;
     }
 
 }

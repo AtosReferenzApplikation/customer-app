@@ -3,7 +3,7 @@ package app.model;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
-@Table("tickets")
+@Table
 public class Ticket {
 
     @PrimaryKey
@@ -12,16 +12,16 @@ public class Ticket {
     private String threadId;
 
     public Ticket(){}
-    public Ticket(String userId, String convId, String threadId){
-        this.userId = userId;
+    public Ticket(String convId, String threadId, String userId){
         this.convId = convId;
         this.threadId = threadId;
+        this.userId = userId;
     }
 
     public String getUserId() {
         return this.userId;
     }
-    public String getConversationId() {
+    public String getConvId() {
         return this.convId;
     }
     public String getThreadId() {
@@ -31,8 +31,8 @@ public class Ticket {
     public void setUserId(String userId) {
         this.userId = userId;
     }
-    public void setConversationId(String conversationId) {
-        this.convId = conversationId;
+    public void setConvId(String convId) {
+        this.convId = convId;
     }
     public void setThreadId(String threadId) {
         this.threadId = threadId;

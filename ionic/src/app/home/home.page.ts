@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { CircuitService} from '../shared/services/circuit/circuit.service';
 import { LoadingController } from '@ionic/angular';
 import { ConversationService } from '../shared/services/conversation/conversation.service';
@@ -6,7 +6,6 @@ import { Supporter } from '../models/supporter';
 import { SupportRequest } from '../models/supportRequest';
 import { Ticket } from '../models/ticket';
 import { first } from 'rxjs/operators';
-import * as uuid from 'uuid';
 
 @Component({
   selector: 'app-home',
@@ -19,7 +18,7 @@ export class HomePage implements OnInit {
   supporter: Supporter = {email : ''};
   request: SupportRequest = {id: '', subject: '', description: ''};
   ticket: Ticket = {userId: '', convId: '', threadId: ''};
-  uuid: string = uuid.v4();
+  uuid: string;
 
   user: any;
   threads = []; // all threads of conversation
@@ -33,7 +32,7 @@ export class HomePage implements OnInit {
   constructor(
       public loadingController: LoadingController,
       public circuitService: CircuitService,
-      public conversationService: ConversationService,
+      public conversationService: ConversationService
   ) {
     this.user = this.circuitService.loggedOnUser;
   }
@@ -43,8 +42,8 @@ export class HomePage implements OnInit {
     this.circuitService.authenticateUser();
     this.conversationService.currentSupporter.subscribe(supporter => this.supporter = supporter);
     this.conversationService.currentRequest.pipe(first()).subscribe( request => this.request = request);
-    console.log('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB');
     this.startNewChat(this.request.subject, this.request.description);
+    this.setTicket();
     this.circuitService.loggedIn.subscribe(value => {
       if (value) {
         this.setThreadsOfConversation();
@@ -103,7 +102,6 @@ export class HomePage implements OnInit {
     );
     this.threads = threadObject.threads;
     this.sendTopicMessage(subject, content);
-    this.setTicket();
   }
 
   getParticipants() {
@@ -152,10 +150,16 @@ export class HomePage implements OnInit {
     return await loading.present();
   }
 
-  setTicket() {
+  async setTicket() {
+      await this.conversationService.currentUUID.subscribe(res => this.uuid = res);
       this.ticket = {userId: this.uuid, convId: this.circuitService.conversation.convId, threadId: this.thread[0].parentItem.itemId};
-      this.conversationService.addTicket('/spring/addTicket', this.ticket);
+      // this.ticket.userId = this.uuid;
+      // this.ticket.convId = this.circuitService.conversation.convId;
+      // this.ticket.threadId = this.thread[0].parentItem.itemId;
+      console.log('Test');
+      await this.conversationService.addTicket('/spring/addTicket', this.ticket).subscribe();
   }
+
   scrollDown() {
     this.container = document.getElementById('chat');
     this.container.scrollTop = this.container.scrollHeight;

@@ -31,6 +31,7 @@
     "@types/stompjs": "^2.3.3",
     "circuit-sdk": "^1.2.6402",
     "core-js": "^2.5.4",
+    "ngx-cookie-service": "^2.2.0",
     "rxjs": "~6.5.1",
     "sockjs-client": "^1.1.5",
     "tslib": "^1.9.0",

@@ -58,5 +58,16 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
     public SchemaAction getSchemaAction() {
         return SchemaAction.CREATE_IF_NOT_EXISTS;
     }
+
+
+    /*
+     * Get the entity package (where the entity class has the @Table annotation)
+     */
+    @Override
+    public String[] getEntityBasePackages() {
+        return new String[] { "app.model.Ticket" };
+    }
+
+
 }
 

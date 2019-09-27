@@ -30,7 +30,7 @@ export class CircuitService {
   // OAuth configuration
   oauthConfig = {
     domain: 'circuitsandbox.net',
-    client_id: '7accbde69451477f98c395b9a35374bd',  // TODO move customer app and ServiceCenter to same sandbox
+    client_id: '8e3edf9798f341c08ae59b5d8cf74341',
     redirect_uri: this.redirectUri,
     scope: 'READ_USER_PROFILE,' +
         'WRITE_USER_PROFILE,' +

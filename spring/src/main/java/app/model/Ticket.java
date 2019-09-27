@@ -3,7 +3,7 @@ package app.model;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
-@Table
+@Table("ticket")
 public class Ticket {
 
     @PrimaryKey
